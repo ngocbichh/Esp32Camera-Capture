@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <title>Client</title>
+        <style>
+            body { text-align:center;}
+          </style>
+    </head>
+    
+    <body>
+        <div id="container">
+            <h2>Camera Security</h2>
+            <p>It might take more than 5 seconds to capture a photo.</p>
+            <p>
+              <button onclick="LiveStream()"> STREAMING </button>
+              <button onclick="capturePhoto()">CAPTURE PHOTO</button>
+              <button onclick="closeLivestream();">STOP STREAM </button>
+              <button onclick="location.reload();">REFRESH PAGE</button>
+            </p>
+          </div>
+        <img src="">
+        <div>
+            <input type="button" value="Show Photo" onclick="showImage();"/>
+            <input type="button" value=" Cancel" onclick="cancelImage();"/>
+            <img id="loadingImage" src="/photo.jpg" style="visibility:hidden"/>
+            </div>
+        <script>
+             var xhr = new XMLHttpRequest();
+            const img = document.querySelector('img');
+            const WS_URL = 'ws:///192.168.0.103:8888';
+            const ws = new WebSocket(WS_URL);
+            
+            // function connectWS()
+            // {
+            //     xhr.open("GET","/connect",true);
+            //     xhr.send();
+            //     alert("Ban da connect thanh cong xin moi xem stream");
+            // }
+            function LiveStream()
+            {
+                xhr.open("GET","/livestream",true);
+                xhr.send();
+                ws.onopen = () => console.log(`Connected to ${WS_URL}`);
+             let urlObject;
+             ws.onmessage = message => {
+                const arrayBuffer = message.data;
+                if(urlObject){
+                    URL.revokeObjectURL(urlObject);
+                }
+                urlObject = URL.createObjectURL(new Blob([arrayBuffer]));
+                img.src = urlObject;
+            }}
+            function closeLivestream()
+            {
+                ws.close();
+            }
+            
+            function capturePhoto()
+            {
+            xhr.open("GET", "/capture", true);
+            xhr.send();
+            }
+
+            function showImage(){
+        document.getElementById('loadingImage').style.visibility="visible";
+    }
+     function cancelImage(){
+        document.getElementById('loadingImage').style.visibility="hidden";
+     }
+        </script>
+    </body>
+</html>
